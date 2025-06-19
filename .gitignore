@@ -1,0 +1,7 @@
+__pycache__
+chroma_db/
+.env
+output/
+test.py
+venv/
+*.pyc
