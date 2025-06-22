@@ -1,6 +1,16 @@
 import chromadb
 import datetime
 
+def get_next_version(collection, doc_id):
+    # Use .get() to just fetch metadata, without requiring any query vector
+    results = collection.get(
+        where={"doc_id": doc_id},
+        include=["metadatas"]
+    )
+    versions = [meta["version"] for meta in results["metadatas"] if "version" in meta]
+    return max(versions, default=0) + 1
+
+
 def save_to_chromadb(doc_id, version, stage, text, is_final=False, collection=None):
     if collection is None:
         client = chromadb.PersistentClient(path="./chroma_db")
@@ -29,5 +39,5 @@ def save_initial_versions(doc_id):
         reviewed_text = f.read()
     save_to_chromadb(doc_id, 1, "og", og_text, is_final=False, collection=collection)
     save_to_chromadb(doc_id, 2, "spun", spun_text, is_final=False, collection=collection)
-    save_to_chromadb(doc_id, 3, "reviewed", reviewed_text, is_final=True, collection=collection)
+    save_to_chromadb(doc_id, 3, "reviewed", reviewed_text, is_final=False, collection=collection)
     print(f"Initial versions for {doc_id} saved to ChromaDB.")
